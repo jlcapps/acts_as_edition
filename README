@@ -1,0 +1,94 @@
+ActsAsEdition
+=============
+
+acts_as_edition is a Ruby on Rails plugin for creating new editions of a 
+tree (think document) of ActiveRecord models. 
+
+Each new edition tree is a deep clone of the previous tree. The edition tree is
+defined using an acts_as_edition declaration on each model in the tree.  Using
+the resources option, acts_as_edition supports management of relationships
+between models in the edition tree and those outside it. A selection of hooks
+provide additional control over the cloning process.  Finally, each object in
+the tree maintains a simple belongs_to relationship with its ancestor in the
+previous edition.
+
+If you are considering acts_as_edition, you should also evaluate
+acts_as_versioned and deep_cloning:
+
+git://github.com/technoweenie/acts_as_versioned.git
+git://github.com/DefV/deep_cloning.git
+
+Install
+=======
+
+script/plugin install git://github.com/jlcapps/acts_as_edition.gt
+
+Example
+=======
+
+First, add ancestor_id column to every table in the tree:
+
+script/generate edition_migration guides abbreviations imprints places
+rake db:migrate
+
+Then declare acts_as_edition in the model class:
+
+class Guide < ActiveRecord::Base
+  acts_as_edition :edition_chain => [:abbreviation, :imprint, :places],
+                  :resources => [:country, :retailers, :authors],
+                  :pre_hook => :unpublish_self,
+                  :after_clone => :increment_descendant_year,
+                  :post_hook => :publish_descendant
+  has_one :abbreviation
+  belongs_to :imprint
+  has_many :places
+  has_one :country
+  has_many :retailers
+  has_and_belongs_to_many :authors
+
+protected
+
+  def unpublish_self
+    self.published = false
+    self.save!
+  end
+
+  def increment_descendant_year
+    self.year = (self.year.to_i + 1).to_s
+    self.save!
+  end
+
+  def publish_descendant
+    self.descendant.published = true
+    self.descendant.save!
+  end
+end
+
+class Abbreviation < ActiveRecord::Base
+  . . .
+end
+
+And so on -- these models are taken from the tests if you need more context.
+
+To clone:
+
+new_edition = Guide.first.clone_edition!
+new_edition.ancestor # == Guide.first
+Guide.first.descendant # == new_edition
+
+Attributes listed in edition_chain are cloned. Note that their model classes
+must also have acts_as_edition declarations.
+
+Atributes listed in resources are not cloned. The relationship between these
+resource objects and objects in the previous edition tree are reestablished in
+the new edition tree. NOTE: the relatishionship of the resource to the original
+object may be broken. The exception is resources in a habtm relationship with
+edition objects. In these cases, the relationship to the new edition is
+additive.
+
+pre_hook and post_hook are called at the beginning and end of the process on
+the original object. The after_clone hook is called *on the newly cloned
+object* before it is saved to the database. 
+
+Copyright (c) 2009 Virginia Department of Education, released under the MIT
+license

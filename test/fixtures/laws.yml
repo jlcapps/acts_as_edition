@@ -1,0 +1,7 @@
+edinburg_law:
+  name: No left on red
+  places: edinburgh
+
+national:
+  name: Drive on the wrong side of the road
+  places: edinburgh, glasgow
