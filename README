@@ -15,13 +15,13 @@ previous edition.
 If you are considering acts_as_edition, you should also evaluate
 acts_as_versioned and deep_cloning:
 
-git://github.com/technoweenie/acts_as_versioned.git
-git://github.com/DefV/deep_cloning.git
+http://github.com/technoweenie/acts_as_versioned
+http://github.com/DefV/deep_cloning
 
 Install
 =======
 
-script/plugin install git://github.com/jlcapps/acts_as_edition.gt
+script/plugin install git://github.com/jlcapps/acts_as_edition.git
 
 Example
 =======
