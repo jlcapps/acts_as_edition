@@ -8,9 +8,10 @@ Each new edition tree is a deep clone of the previous tree. The edition tree is
 defined using an acts_as_edition declaration on each model in the tree.  Using
 the resources option, acts_as_edition supports management of relationships
 between models in the edition tree and those outside it. A selection of hooks
-provide additional control over the cloning process.  Finally, each object in
-the tree maintains a simple belongs_to relationship with its ancestor in the
-previous edition.
+provide additional control over the cloning process.  Conditions can be
+specified on models in the tree to determin when/if they are clone. Finally,
+each object in the tree maintains a simple belongs_to relationship with its 
+ancestor in the previous edition.
 
 If you are considering acts_as_edition, you should also evaluate
 acts_as_versioned and deep_cloning:
@@ -39,6 +40,7 @@ class Guide < ActiveRecord::Base
                   :pre_hook => :unpublish_self,
                   :after_clone => :increment_descendant_year,
                   :post_hook => :publish_descendant
+                  :conditions => { :returns_true => true }
   has_one :abbreviation
   belongs_to :imprint
   has_many :places
@@ -61,6 +63,10 @@ protected
   def publish_descendant
     self.descendant.published = true
     self.descendant.save!
+  end
+  
+  def returns_true
+    name != 'Noclonelandia'
   end
 end
 
@@ -90,5 +96,9 @@ pre_hook and post_hook are called at the beginning and end of the process on
 the original object. The after_clone hook is called *on the newly cloned
 object* before it is saved to the database. 
 
-Copyright (c) 2009 Virginia Department of Education, released under the MIT
+If an object does not meet one or more conditions specified in the conditions
+options hash, clone_edition! on that object will return nil and the object will
+not be copied into the new tree.
+
+Copyright (c) 2010 Virginia Department of Education, released under the MIT
 license
