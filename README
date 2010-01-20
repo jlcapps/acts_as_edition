@@ -96,7 +96,7 @@ pre_hook and post_hook are called at the beginning and end of the process on
 the original object. The after_clone hook is called *on the newly cloned
 object* before it is saved to the database. 
 
-If an object does not meet one or more conditions specified in the conditions
+If an object does not meet all conditions specified in the conditions
 options hash, clone_edition! on that object will return nil and the object will
 not be copied into the new tree.
 
