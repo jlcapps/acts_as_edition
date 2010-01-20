@@ -3,7 +3,8 @@ class Guide < ActiveRecord::Base
                   :resources => [:country, :retailers, :authors],
                   :pre_hook => :unpublish_self,
                   :after_clone => :increment_descendant_year,
-                  :post_hook => :publish_descendant
+                  :post_hook => :publish_descendant,
+                  :conditions => { :returns_true => true }
   has_one :abbreviation
   belongs_to :imprint
   has_many :places
@@ -26,5 +27,9 @@ protected
   def publish_descendant
     self.descendant.published = true
     self.descendant.save!
+  end
+
+  def returns_true
+    name != 'Noclonelandia'
   end
 end

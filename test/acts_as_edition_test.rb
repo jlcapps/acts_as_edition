@@ -38,6 +38,15 @@ class ActsAsEditionTest < ActiveSupport::TestCase
     assert_respond_to Law.new, :resources
   end
 
+  test ":conditions is stored as class attr" do
+    assert_respond_to guides(:scotland), :conditions
+    assert guides(:scotland).conditions.keys.include? :returns_true
+  end
+
+  test "should not clone if conditions not met" do
+    assert_equal guides(:noclonelandia).clone_edition!, nil
+  end
+
   test "guide and abbreviation are properly related" do
     assert_equal guides(:scotland).abbreviation, abbreviations(:sco)
   end
@@ -47,6 +56,13 @@ class ActsAsEditionTest < ActiveSupport::TestCase
     cloned = orig.clone_edition!
     assert_equal orig.abbreviation, cloned.abbreviation.ancestor
     assert_equal orig.abbreviation.descendant, cloned.abbreviation
+  end
+
+  test "should not clone has_one in edition_chain if conditions not met" do
+    orig = guides(:england)
+    cloned = orig.clone_edition!
+    assert_equal orig.abbreviation.descendant, nil
+    assert_equal cloned.abbreviation, nil
   end
 
   test "should clone belongs_to specified in edition_chain" do
@@ -64,7 +80,7 @@ class ActsAsEditionTest < ActiveSupport::TestCase
     cloned = orig.clone_edition!
     orig.reload
     cloned.reload
-    orig.places.each do |place|
+    orig.places.select { |p| p.cloneme? }.each do |place|
       assert cloned.places.include? place.descendant
       assert_equal place.descendant.guide, cloned
     end
@@ -72,6 +88,17 @@ class ActsAsEditionTest < ActiveSupport::TestCase
       assert orig.places.include? place.ancestor
       assert_equal place.ancestor.guide, orig
     end 
+  end
+
+  test "should not clone edition_chain has_manys if conditions not met" do
+    orig = guides(:scotland)
+    cloned = orig.clone_edition!
+    orig.reload
+    cloned.reload
+    assert_equal orig.places.count, cloned.places.count + 1
+    orig.places.select { |p| !p.cloneme? }.each do |place|
+      assert !cloned.places.include?(place)
+    end
   end
 
   test "should clone nested has_manys" do
@@ -96,7 +123,9 @@ class ActsAsEditionTest < ActiveSupport::TestCase
     orig.reload
     cloned.reload
     orig_laws = cloned_laws = []
-    orig.places.each { |place| orig_laws += place.laws }
+    orig.places.each do |place| 
+      orig_laws += place.laws.select { |l| l.cloneme? }
+    end
     cloned.places.each { |place| cloned_laws += place.laws }
     assert_equal orig_laws.count, cloned_laws.count
     orig_laws.each do |orig_law|
@@ -111,7 +140,7 @@ class ActsAsEditionTest < ActiveSupport::TestCase
       assert orig_laws.include?(cloned_law.ancestor)
     end
   end
-
+  
   test "should update relationship to has_ones spec'd in resources" do
     # XXX this is a contrived case; would probably want to clone . . .
     orig = guides(:scotland)

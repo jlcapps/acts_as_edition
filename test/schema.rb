@@ -11,11 +11,13 @@ ActiveRecord::Schema.define(:version => 1) do
     t.column :name, :string
     t.column :guide_id, :integer
     t.column :ancestor_id, :integer, :default => nil
+    t.column :cloneme, :boolean, :default => true
   end
 
   create_table :laws, :force => true do |t|
     t.column :name, :string
     t.column :ancestor_id, :integer, :default => nil
+    t.column :cloneme, :boolean, :default => true
   end
 
   create_table "laws_places", :id => false, :force => true do |t|
@@ -33,6 +35,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.column :name, :string
     t.column :guide_id, :integer
     t.column :ancestor_id, :integer, :default => nil
+    t.column :cloneme, :boolean, :default => true
   end 
 
   create_table :imprints, :force=> true do |t|

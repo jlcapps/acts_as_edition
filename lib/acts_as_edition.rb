@@ -19,12 +19,13 @@ module ActsAsEdition
       has_one :descendant, :class_name => name, :foreign_key => :ancestor_id
 
       cattr_accessor :edition_chain, :resources, :pre_hook, :after_clone,
-                     :post_hook
+                     :post_hook, :conditions
       self.edition_chain = Array((options[:edition_chain] || [])) 
       self.resources = Array((options[:resources] || []))
       self.pre_hook = options[:pre_hook]
       self.after_clone = options[:after_clone]
       self.post_hook = options[:post_hook]
+      self.conditions = (options[:conditions] || {})
 
       include ActsAsEdition::InstanceMethods
     end
@@ -45,10 +46,16 @@ module ActsAsEdition
         self.send("#{self.post_hook}") if self.post_hook
         cloned.save!
         cloned.reload
-      end
+      end if aae_conditions_met
     end
 
   protected
+
+    def aae_conditions_met
+      self.conditions.keys.collect do |k| 
+        self.send(k) == self.conditions[k]
+      end.all? 
+    end
 
     def clone_edition_chain
       self.edition_chain.each do |association|
@@ -57,12 +64,13 @@ module ActsAsEdition
           cloned = (self.send(association) && 
                     (self.send(association).descendant || 
                      self.send(association).clone_edition!))
-          self.descendant.send("#{association}=", cloned)
+          self.descendant.send("#{association}=", cloned) unless cloned.nil?
           self.descendant.save!
         when :has_many, :has_and_belongs_to_many
           self.send(association) && self.send(association).each do |associated|
             cloned = associated.descendant || associated.clone_edition!
-            unless self.descendant.send("#{association}").include?(cloned)
+            unless (self.descendant.send("#{association}").include?(cloned) ||
+                    cloned.nil?)
               self.descendant.send("#{association}") << cloned
               self.descendant.save!
             end
@@ -79,7 +87,7 @@ module ActsAsEdition
           resource = self.send(association)
           self.descendant.send("#{association}=", resource)
           self.descendant.save!
-       when :has_many, :has_and_belongs_to_many
+        when :has_many, :has_and_belongs_to_many
           resources = self.send(association)
           resources.each do |resource|
             self.descendant.send("#{association}") << resource

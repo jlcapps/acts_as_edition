@@ -5,3 +5,8 @@ edinburgh:
 glasgow:
   name: Glasgow
   guide: scotland
+
+aberdeen:
+  name: Aberdeen
+  guide: scotland
+  cloneme: false

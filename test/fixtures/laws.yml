@@ -5,3 +5,8 @@ edinburg_law:
 national:
   name: Drive on the wrong side of the road
   places: edinburgh, glasgow
+
+common:
+  name: Common law
+  places: glasgow
+  cloneme: false

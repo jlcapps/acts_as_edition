@@ -4,3 +4,17 @@ scotland:
   published: true
   year: 2009
   authors: mary, darren, laura
+
+noclonelandia:
+  name: Noclonelandia
+  imprint: fodors
+  published: true
+  year: 2009
+  authors: lee
+
+england:
+  name: England
+  imprint: fodors
+  published: true
+  year: 2009
+  authors: peggy

@@ -1,3 +1,9 @@
 sco:
   name: SCO
   guide: scotland 
+  cloneme: true
+
+eng:
+  name: ENG
+  guide: england
+  cloneme: false
