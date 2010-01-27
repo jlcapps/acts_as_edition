@@ -1,36 +1,28 @@
 # ActsAsEdition
 module ActsAsEdition
-  def self.included(base)
-    base.extend(ClassMethods)
+   # :pre_hook and :post_hook run on the original object. :after_clone
+   # runs on the cloned object before it is saved.
+   # Attributes listed in :edition_chain are cloned and related to 
+   # self.descendant. Those listed in :resources are related to the 
+   # self.descendant and are otherwise left as is.
+   # NOTE: habtm realtionships are handled differently from other 
+   # resources. For the resource, the change is additive. The resource
+   # will have a relationship with original *and* cloned edition object.
+   def acts_as_edition(options = {})
+    belongs_to :ancestor, :class_name => name, :foreign_key => :ancestor_id
+    has_one :descendant, :class_name => name, :foreign_key => :ancestor_id
+
+    cattr_accessor :edition_chain, :resources, :pre_hook, :after_clone,
+                   :post_hook, :conditions
+    self.edition_chain = Array((options[:edition_chain] || [])) 
+    self.resources = Array((options[:resources] || []))
+    self.pre_hook = options[:pre_hook]
+    self.after_clone = options[:after_clone]
+    self.post_hook = options[:post_hook]
+    self.conditions = (options[:conditions] || {})
+
+    include InstanceMethods
   end
-
-
-  module ClassMethods
-     # :pre_hook and :post_hook run on the original object. :after_clone
-     # runs on the cloned object before it is saved.
-     # Attributes listed in :edition_chain are cloned and related to 
-     # self.descendant. Those listed in :resources are related to the 
-     # self.descendant and are otherwise left as is.
-     # NOTE: habtm realtionships are handled differently from other 
-     # resources. For the resource, the change is additive. The resource
-     # will have a relationship with original *and* cloned edition object.
-     def acts_as_edition(options = {})
-      belongs_to :ancestor, :class_name => name, :foreign_key => :ancestor_id
-      has_one :descendant, :class_name => name, :foreign_key => :ancestor_id
-
-      cattr_accessor :edition_chain, :resources, :pre_hook, :after_clone,
-                     :post_hook, :conditions
-      self.edition_chain = Array((options[:edition_chain] || [])) 
-      self.resources = Array((options[:resources] || []))
-      self.pre_hook = options[:pre_hook]
-      self.after_clone = options[:after_clone]
-      self.post_hook = options[:post_hook]
-      self.conditions = (options[:conditions] || {})
-
-      include ActsAsEdition::InstanceMethods
-    end
-  end
-
 
   module InstanceMethods
     def clone_edition!
