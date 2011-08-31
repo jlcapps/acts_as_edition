@@ -75,6 +75,15 @@ class ActsAsEditionTest < ActiveSupport::TestCase
     assert orig.imprint.descendant.guides.include? orig.descendant
   end
 
+  test "should maintain belongs_to relationship in resources" do
+    orig = guides(:scotland)
+    cloned = orig.clone_edition!
+    orig.reload
+    cloned.reload
+    assert_equal orig.abbreviation.alphabet.id,
+      orig.descendant.abbreviation.alphabet.id
+  end
+
   test "should clone has_manys specified in edition_chain" do
     orig = guides(:scotland)
     cloned = orig.clone_edition!

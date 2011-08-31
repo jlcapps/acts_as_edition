@@ -1,9 +1,11 @@
 sco:
   name: SCO
   guide: scotland 
+  alphabet: latin
   cloneme: true
 
 eng:
   name: ENG
   guide: england
+  alphabet: latin
   cloneme: false

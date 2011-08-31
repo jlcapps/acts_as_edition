@@ -31,8 +31,13 @@ ActiveRecord::Schema.define(:version => 1) do
     t.column :ancestor_id, :integer, :default => nil
   end
 
+  create_table :alphabets, :force => true do |t|
+    t.column :name, :string
+  end
+
   create_table :abbreviations, :force => true do |t|
     t.column :name, :string
+    t.column :alphabet_id, :integer
     t.column :guide_id, :integer
     t.column :ancestor_id, :integer, :default => nil
     t.column :cloneme, :boolean, :default => true
