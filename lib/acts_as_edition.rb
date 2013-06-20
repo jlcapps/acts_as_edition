@@ -2,10 +2,10 @@
 module ActsAsEdition
    # :pre_hook and :post_hook run on the original object. :after_clone
    # runs on the cloned object before it is saved.
-   # Attributes listed in :edition_chain are cloned and related to 
-   # self.descendant. Those listed in :resources are related to the 
+   # Attributes listed in :edition_chain are cloned and related to
+   # self.descendant. Those listed in :resources are related to the
    # self.descendant and are otherwise left as is.
-   # NOTE: habtm realtionships are handled differently from other 
+   # NOTE: habtm realtionships are handled differently from other
    # resources. For the resource, the change is additive. The resource
    # will have a relationship with original *and* cloned edition object.
    def acts_as_edition(options = {})
@@ -14,7 +14,7 @@ module ActsAsEdition
 
     cattr_accessor :edition_chain, :resources, :pre_hook, :after_clone,
                    :post_hook, :conditions
-    self.edition_chain = Array((options[:edition_chain] || [])) 
+    self.edition_chain = Array((options[:edition_chain] || []))
     self.resources = Array((options[:resources] || []))
     self.pre_hook = options[:pre_hook]
     self.after_clone = options[:after_clone]
@@ -28,7 +28,7 @@ module ActsAsEdition
     def clone_edition!
       self.class.transaction do
         self.send("#{self.pre_hook}") if self.pre_hook
-        cloned = self.clone
+        cloned = ActiveRecord::VERSION::MAJOR==3 ? self.dup : self.clone
         cloned.send("#{self.after_clone}") if self.after_clone
         cloned.ancestor = self
         cloned.save!
@@ -44,17 +44,17 @@ module ActsAsEdition
   protected
 
     def aae_conditions_met
-      self.conditions.keys.collect do |k| 
+      self.conditions.keys.collect do |k|
         self.send(k) == self.conditions[k]
-      end.all? 
+      end.all?
     end
 
     def clone_edition_chain
       self.edition_chain.each do |association|
-        case self.class.reflect_on_association(association).macro 
+        case self.class.reflect_on_association(association).macro
         when :has_one, :belongs_to
-          cloned = (self.send(association) && 
-                    (self.send(association).descendant || 
+          cloned = (self.send(association) &&
+                    (self.send(association).descendant ||
                      self.send(association).clone_edition!))
           self.descendant.send("#{association}=", cloned) unless cloned.nil?
           self.descendant.save!
@@ -73,7 +73,7 @@ module ActsAsEdition
 
     def clone_resource_chain
       self.reload
-      self.resources.each do |association|
+      self.resources.reject { |r| r.to_s.empty? }.each do |association|
         case self.class.reflect_on_association(association).macro
         when :has_one
           resource = self.send(association)
