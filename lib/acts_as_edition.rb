@@ -90,3 +90,6 @@ module ActsAsEdition
     end
   end
 end
+
+ActiveRecord::Base.extend ActsAsEdition
+

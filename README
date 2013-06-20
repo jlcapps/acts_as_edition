@@ -1,8 +1,8 @@
 ActsAsEdition
 =============
 
-acts_as_edition is a Ruby on Rails plugin for creating new editions of a 
-tree (think document) of ActiveRecord models. 
+acts_as_edition is a ruby gem for creating new editions of a tree (think
+document) of ActiveRecord models.
 
 Each new edition tree is a deep clone of the previous tree. The edition tree is
 defined using an acts_as_edition declaration on each model in the tree.  Using
@@ -10,7 +10,7 @@ the resources option, acts_as_edition supports management of relationships
 between models in the edition tree and those outside it. A selection of hooks
 provide additional control over the cloning process.  Conditions can be
 specified on models in the tree to determine when/if they are cloned. Finally,
-each object in the tree maintains a simple belongs_to relationship with its 
+each object in the tree maintains a simple belongs_to relationship with its
 ancestor in the previous edition.
 
 If you are considering acts_as_edition, you should also evaluate
@@ -22,14 +22,24 @@ http://github.com/DefV/deep_cloning
 Install
 =======
 
-script/plugin install git://github.com/jlcapps/acts_as_edition.git
+gem install acts_as_versioned
 
 Example
 =======
 
-First, add ancestor_id column to every table in the tree:
+First, add ancestor_id column to every table in the tree, using a migration
+thusly:
 
-script/generate edition_migration guides abbreviations imprints places
+class AddEditionMigration < ActiveRecord::Migration
+  def self.up
+    add_column :mymodel, :ancestor_id, :integer
+  end
+
+  def self.down
+    remove_column :mymodel, :ancestor_id
+  end
+end
+
 rake db:migrate
 
 Then declare acts_as_edition in the model class:
@@ -64,7 +74,7 @@ protected
     self.descendant.published = true
     self.descendant.save!
   end
-  
+
   def returns_true
     name != 'Noclonelandia'
   end
@@ -94,11 +104,11 @@ additive.
 
 pre_hook and post_hook are called at the beginning and end of the process on
 the original object. The after_clone hook is called *on the newly cloned
-object* before it is saved to the database. 
+object* before it is saved to the database.
 
 If an object does not meet all conditions specified in the conditions
 options hash, clone_edition! on that object will return nil and the object will
 not be copied into the new tree.
 
-Copyright (c) 2010 Virginia Department of Education, released under the MIT
+Copyright (c) 2010, 2013 Virginia Department of Education, released under the MIT
 license
