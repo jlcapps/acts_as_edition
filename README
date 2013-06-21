@@ -22,7 +22,7 @@ http://github.com/DefV/deep_cloning
 Install
 =======
 
-gem install acts_as_versioned
+gem install acts_as_edition
 
 Example
 =======
