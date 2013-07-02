@@ -139,7 +139,7 @@ class ActsAsEditionTest < ActiveSupport::TestCase
       each { |place| cloned_laws += place.laws.select { |l| l.cloneme? } }
     assert_equal orig_laws.count, cloned_laws.count
     orig_laws.each do |orig_law|
-      assert_equal 1, Law.find_all_by_ancestor_id(orig_law.id).count
+      assert_equal 1, Law.where(:ancestor_id => orig_law.id).count
       assert !cloned_laws.include?(orig_law)
       assert cloned_laws.include?(orig_law.descendant)
       orig_law.places.each do |orig_place|

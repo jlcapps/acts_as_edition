@@ -28,7 +28,7 @@ module ActsAsEdition
     def clone_edition!
       self.class.transaction do
         self.send("#{self.pre_hook}") if self.pre_hook
-        cloned = ActiveRecord::VERSION::MAJOR==3 ? self.dup : self.clone
+        cloned = self.dup
         cloned.send("#{self.after_clone}") if self.after_clone
         cloned.ancestor = self
         cloned.save!

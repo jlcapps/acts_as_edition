@@ -22,7 +22,10 @@ http://github.com/DefV/deep_cloning
 Install
 =======
 
-gem install acts_as_edition
+  gem install acts_as_edition
+
+For ActiveRecord < 4.0.0 use:
+  gem install acts_as_edition --version '=1.0.1'
 
 Example
 =======
